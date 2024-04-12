@@ -85,3 +85,17 @@ def set_llm_settings_sidebar():
                     threshold_value
                 )
     return provider
+
+
+# def llm_settings_tabs():
+#     providers_tab, settings_tab = st.sidebar.tabs(["Providers", "Settings"])
+#
+#     with providers_tab:
+#         st.header("Providers")
+#         provider = set_provider()
+#
+#     with settings_tab:
+#         st.header("Settings")
+#         set_llm_settings_sidebar()
+#
+#     return provider

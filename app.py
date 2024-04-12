@@ -1,3 +1,7 @@
+from libs.components.configure_api_keys import set_api_keys
+from libs.components.disable_components import disable_deploy
+from libs.components.header import set_page_header
+
 __import__("pysqlite3")
 import sys
 
@@ -19,7 +23,7 @@ from libs.utilities.log import Log
 log = Log(
     log_file_path=Path(config.log_path) / "docmind.log",
     level=config.log_level,
-)
+    )
 log.get_logger()
 
 logger = logging.getLogger(__name__)
@@ -28,15 +32,20 @@ logger.info(f"Sqlite version: {sqlite3.sqlite_version}")
 st.set_page_config(
     page_title="DocMind",
     page_icon="📚🧠",
-)
+    layout="wide",
+    menu_items={
+        "Get Help"    : "https://github.com/abdalrohman/DocMind/discussions",
+        "Report a bug": "https://github.com/abdalrohman/DocMind/issues",
+        },
+    )
 
-# Set the title
-st.markdown("# Welcome to DocMind!")
-st.markdown("## **Your Personal Document Assistant 📚**")
+disable_deploy()
+
+set_page_header()
 
 
 # Load environment variables from a .env file if it exists
-@st.cache_data(experimental_allow_widgets=True)
+# @st.cache_data(experimental_allow_widgets=True)
 def load_env():
     env_file_path = Path(".env")
     st_secretes = Path(".streamlit/secrets.toml")
@@ -46,7 +55,7 @@ def load_env():
         "Search_Engine",
         "Embiddings",
         "Telemetry",
-    ]
+        ]
     if env_file_path.exists():
         EnvironmentLoader(env_file_path).load_envs()
     elif st_secretes.exists():
@@ -55,60 +64,12 @@ def load_env():
             for key, value in st.secrets[section].items():
                 os.environ[key] = value
     else:
-        logger.info("Loading keys from sidebar")
-        api_keys_dict = {
-            "Langchain API Keys": ["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"],
-            "Search Engines API Keys": [
-                "GOOGLE_CSE_ID",
-                "GOOGLE_SEARCH_API_KEY",
-                "EXA_API_KEY",
-                "TAVILY_API_KEY",
-            ],
-            "LLM Providers API Keys": [
-                "GROQ_API_KEY",
-                "GOOGLE_API_KEY",
-                "FIREWORKS_API_KEY",
-                "OPENAI_API_KEY",
-            ],
-            "Embeddings Providers API Keys": [
-                "VOYAGE_API_KEY",
-                "TOGETHER_API_KEY",
-                "CLOUDFLARE_API_KEY",
-                "CLOUDFLARE_ACCOUNT_ID",
-            ],
-        }
-        st.session_state.setdefault("submit_env", False)
-
-        if not st.session_state["submit_env"]:
-            st.sidebar.error(
-                "An `.env` file was not detected. Please rename the .env.example file to .env "
-                "and configure your environmental variables, "
-                "or provide the necessary information in the sidebar."
-            )
-            st.sidebar.markdown(
-                "**Note:** Set only the keys for the providers you intend to use."
-            )
-            os.environ["LANGCHAIN_TRACING_V2"] = "true"
-            os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-            os.environ["ANONYMIZED_TELEMETRY"] = "False"
-            for expander_title, api_keys in api_keys_dict.items():
-                st.sidebar.markdown(f"**Set your {expander_title}**:")
-                for key in api_keys:
-                    user_key = st.sidebar.text_input(
-                        f"{key}",
-                        type="password",
-                        help=f"Set this if not set the the value in .env file for {key}.",
-                        key=key.lower(),  # Store the value in st.session_state
-                    )
-                    if user_key:
-                        os.environ[key] = user_key
-            st.sidebar.button("Submit", key="submit_env", type="primary")
-            st.stop()
+        set_api_keys()
 
 
 load_env()
 
-clear_cache = st.sidebar.button("Clear cache")
+clear_cache = st.sidebar.button("Clear cache", use_container_width=True, type="primary")
 if clear_cache:
     st.cache_data.clear()
     st.rerun()
@@ -118,8 +79,12 @@ if clear_cache:
 show_pages(
     [
         Page("app.py", "DocMind", "🧠"),
-        Page("libs/ui/pages/chat_with_search.py", "Chat With Enabled Search", "🔍"),
-        Page("libs/ui/pages/rag_chat.py", "Rag chat", "📚"),
+        Page(
+            "libs/components/pages/chat_with_search.py",
+            "Chat With Enabled Search",
+            "🔍",
+            ),
+        Page("libs/components/pages/rag_chat.py", "Rag chat", "📚"),
         # Page("", "Rag", "❓"),
-    ]
-)
+        ]
+    )
