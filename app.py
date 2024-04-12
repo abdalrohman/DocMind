@@ -1,5 +1,11 @@
+__import__('pysqlite3')
+import sys
+
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import logging
 import os
+import sqlite3
 from pathlib import Path
 
 import streamlit as st
@@ -13,15 +19,16 @@ from libs.utilities.log import Log
 log = Log(
     log_file_path=Path(config.log_path) / "docmind.log",
     level=config.log_level,
-)
+    )
 log.get_logger()
 
 logger = logging.getLogger(__name__)
+logger.info(f"Sqlite version: {sqlite3.sqlite_version}")
 
 st.set_page_config(
     page_title="DocMind",
     page_icon="📚🧠",
-)
+    )
 
 # Set the title
 st.markdown("# Welcome to DocMind!")
@@ -39,7 +46,7 @@ def load_env():
         "Search_Engine",
         "Embiddings",
         "Telemetry",
-    ]
+        ]
     if env_file_path.exists():
         EnvironmentLoader(env_file_path).load_envs()
     elif st_secretes.exists():
@@ -50,26 +57,26 @@ def load_env():
     else:
         logger.info("Loading keys from sidebar")
         api_keys_dict = {
-            "Langchain API Keys": ["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"],
-            "Search Engines API Keys": [
+            "Langchain API Keys"           : ["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"],
+            "Search Engines API Keys"      : [
                 "GOOGLE_CSE_ID",
                 "GOOGLE_SEARCH_API_KEY",
                 "EXA_API_KEY",
                 "TAVILY_API_KEY",
-            ],
-            "LLM Providers API Keys": [
+                ],
+            "LLM Providers API Keys"       : [
                 "GROQ_API_KEY",
                 "GOOGLE_API_KEY",
                 "FIREWORKS_API_KEY",
                 "OPENAI_API_KEY",
-            ],
+                ],
             "Embeddings Providers API Keys": [
                 "VOYAGE_API_KEY",
                 "TOGETHER_API_KEY",
                 "CLOUDFLARE_API_KEY",
                 "CLOUDFLARE_ACCOUNT_ID",
-            ],
-        }
+                ],
+            }
         st.session_state.setdefault("submit_env", False)
 
         if not st.session_state["submit_env"]:
@@ -77,10 +84,10 @@ def load_env():
                 "An `.env` file was not detected. Please rename the .env.example file to .env "
                 "and configure your environmental variables, "
                 "or provide the necessary information in the sidebar."
-            )
+                )
             st.sidebar.markdown(
                 "**Note:** Set only the keys for the providers you intend to use."
-            )
+                )
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
             os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -92,7 +99,7 @@ def load_env():
                         type="password",
                         help=f"Set this if not set the the value in .env file for {key}.",
                         key=key.lower(),  # Store the value in st.session_state
-                    )
+                        )
                     if user_key:
                         os.environ[key] = user_key
             st.sidebar.button("Submit", key="submit_env", type="primary")
@@ -114,5 +121,5 @@ show_pages(
         Page("libs/ui/pages/chat_with_search.py", "Chat With Enabled Search", "🔍"),
         Page("libs/ui/pages/rag_chat.py", "Rag chat", "📚"),
         # Page("", "Rag", "❓"),
-    ]
-)
+        ]
+    )
