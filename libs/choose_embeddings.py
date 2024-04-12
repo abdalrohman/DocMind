@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List
 
+import streamlit as st
 from langchain_core.embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,26 @@ SUPPORTED_EMBEDDINGS: List[str] = [
     "HuggingFaceBgeEmbeddings",
     "OllamaEmbeddings",
 ]
+
+
+@st.cache_resource
+def hug_embedding():
+    from langchain_community.embeddings.huggingface import HuggingFaceBgeEmbeddings
+
+    return HuggingFaceBgeEmbeddings(
+        model_name="BAAI/bge-base-en",
+        model_kwargs={"device": "cpu", "trust_remote_code": True},
+        encode_kwargs={"normalize_embeddings": True},
+    )
+
+
+@st.cache_resource
+def ollama_embedding():
+    from langchain_community.embeddings.ollama import OllamaEmbeddings
+
+    return OllamaEmbeddings(
+        model="nomic-embed-text",
+    )
 
 
 def choose_embed_function(
@@ -84,17 +105,7 @@ def choose_embed_function(
         )
 
     if embd_func_name == "HuggingFaceBgeEmbeddings":
-        from langchain_community.embeddings.huggingface import HuggingFaceBgeEmbeddings
-
-        return HuggingFaceBgeEmbeddings(
-            model_name="BAAI/bge-base-en",
-            model_kwargs={"device": "cpu", "trust_remote_code": True},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+        hug_embedding()
 
     if embd_func_name == "OllamaEmbeddings":
-        from langchain_community.embeddings.ollama import OllamaEmbeddings
-
-        return OllamaEmbeddings(
-            model_name="nomic-embed-text",
-        )
+        ollama_embedding()

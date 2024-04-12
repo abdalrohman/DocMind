@@ -7,7 +7,6 @@ def set_embeddings():
     with st.sidebar:
         embeddings_choice = st.selectbox("Embeddings", options=SUPPORTED_EMBEDDINGS)
 
-        @st.cache_resource
         def choose_embeddings():
             return choose_embed_function(
                 embd_func_name=embeddings_choice,
