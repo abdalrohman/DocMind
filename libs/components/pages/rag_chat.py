@@ -10,9 +10,7 @@ from libs.components.extra_sidbar_options import additional_options
 from libs.components.header import set_page_header
 from libs.components.llm_settings import set_llm_settings_sidebar
 from libs.components.setup_embeddings import set_embeddings
-from libs.components.upload_files import (
-    DocumentProcessor, ProcessRetriever
-    )
+from libs.components.upload_files import DocumentProcessor, ProcessRetriever
 from libs.create_llm_chain import create_chain
 from libs.vectorstore import ChromaDBClient
 
@@ -23,7 +21,7 @@ st.set_page_config(
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="auto",
-    )
+)
 
 disable_deploy()
 
@@ -50,14 +48,14 @@ chroma_dir = data_dir / "chroma"
 with st.sidebar:
     DocumentProcessor(
         embeddings=embeddings, chroma_dir=chroma_dir, temp_dir=temp_dir
-        ).process_documents()
+    ).process_documents()
     if st.session_state.retriever:
         retriever = st.session_state.retriever
     else:
         # try to get existing db if not show warning
         retriever = ProcessRetriever(
             embeddings=embeddings, chroma_dir=chroma_dir
-            ).get_retriever()
+        ).get_retriever()
         st.session_state.show_warning = False
 
 if llm and retriever:
@@ -77,9 +75,9 @@ if llm and retriever:
         full_response = ""
         msg_placeholder = answer_container.container().markdown(full_response + "▌")
         for chunk in answer_chain.stream(
-                {"question": user_input, "chat_history": history.messages},
-                {"configurable": {"llm": provider}},
-                ):
+            {"question": user_input, "chat_history": history.messages},
+            {"configurable": {"llm": provider}},
+        ):
             full_response += chunk
             msg_placeholder.markdown(full_response + "▌")
         msg_placeholder.markdown(full_response)
@@ -89,10 +87,14 @@ if llm and retriever:
 additional_options(history)
 
 if st.sidebar.button(
-        "Clear existing database", key="clear_db_btn",
-        type="primary", use_container_width=True
-        ):
-    if ChromaDBClient(path_to_chroma_db=str(chroma_dir), embeddings_function=embeddings).reset_client():
+    "Clear existing database",
+    key="clear_db_btn",
+    type="primary",
+    use_container_width=True,
+):
+    if ChromaDBClient(
+        path_to_chroma_db=str(chroma_dir), embeddings_function=embeddings
+    ).reset_client():
         logger.info("Success clear database!")
         st.toast("Success clear database!", icon="✅")
         st.rerun()

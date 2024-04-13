@@ -18,7 +18,7 @@ st.set_page_config(
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="auto",
-    )
+)
 
 disable_deploy()
 
@@ -51,9 +51,9 @@ if llm and search:
         full_response = ""
         msg_placeholder = answer_container.container().markdown(full_response + "▌")
         for chunk in search_chain.stream(
-                {"question": user_input, "chat_history": history.messages},
-                {"configurable": {"llm": provider}},
-                ):
+            {"question": user_input, "chat_history": history.messages},
+            {"configurable": {"llm": provider}},
+        ):
             full_response += chunk
             msg_placeholder.markdown(full_response + "▌")
         msg_placeholder.markdown(full_response)

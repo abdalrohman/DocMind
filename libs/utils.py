@@ -2,9 +2,7 @@ from pathlib import Path
 from typing import Union
 
 
-def rmdir_recursive(
-        dir_path: Path
-        ) -> bool:
+def rmdir_recursive(dir_path: Path) -> bool:
     """Deletes dir_path recursively, including all files and dirs in that directory
     Returns True if dir deleted successfully.
     """
@@ -22,13 +20,9 @@ def rmdir_recursive(
     return True if not dir_path.exists() else False
 
 
-def path_to_str(
-        path: Union[Path, str]
-        ) -> str:
+def path_to_str(path: Union[Path, str]) -> str:
     return str(path) if isinstance(path, Path) else path
 
 
-def str_to_path(
-        path: Union[Path, str]
-        ) -> Path:
+def str_to_path(path: Union[Path, str]) -> Path:
     return Path(path) if isinstance(path, str) else path

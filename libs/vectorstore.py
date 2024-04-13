@@ -16,15 +16,15 @@ class ChromaDBClient:
     VALID_DISTANCE_METRIC = ["l2", "ip", "cosine"]
 
     def __init__(
-            self,
-            embeddings_function: Embeddings = None,
-            collection_name: str = "abdulrahman",
-            chroma_store_type: str = "persist",
-            reset: bool = False,
-            delete_collection: bool = False,
-            distance_metric: str = "l2",
-            path_to_chroma_db: str = None,
-            ):
+        self,
+        embeddings_function: Embeddings = None,
+        collection_name: str = "abdulrahman",
+        chroma_store_type: str = "persist",
+        reset: bool = False,
+        delete_collection: bool = False,
+        distance_metric: str = "l2",
+        path_to_chroma_db: str = None,
+    ):
         logger.info("Initializing ChromaDBClient...")
         self.validate_input(chroma_store_type, distance_metric)
 
@@ -39,16 +39,20 @@ class ChromaDBClient:
         settings = Settings(
             allow_reset=True,
             is_persistent=True if self.chroma_store_type == "persist" else False,
-            persist_directory=self.path_to_chroma_db if self.path_to_chroma_db else "./chroma"
-            )
+            persist_directory=self.path_to_chroma_db
+            if self.path_to_chroma_db
+            else "./chroma",
+        )
 
         chroma_instance = Chroma(
-            persist_directory=self.path_to_chroma_db if self.chroma_store_type == "persist" else None,
+            persist_directory=self.path_to_chroma_db
+            if self.chroma_store_type == "persist"
+            else None,
             collection_name=self.collection_name,
             embedding_function=self.embeddings_function,
             collection_metadata={"hnsw:space": self.distance_metric},
             client_settings=settings,
-            )
+        )
 
         # noinspection PyProtectedMember
         self.client = chroma_instance._client
@@ -66,11 +70,7 @@ class ChromaDBClient:
         self.collection_count = self.collection.count()
         logger.info("ChromaDBClient initialized.")
 
-    def validate_input(
-            self,
-            chroma_store_type,
-            distance_metric
-            ):
+    def validate_input(self, chroma_store_type, distance_metric):
         logger.info("Validating input...")
         if chroma_store_type not in self.VALID_TYPES:
             raise ValueError(f"chroma_store_type should be one of {self.VALID_TYPES}")
@@ -78,18 +78,16 @@ class ChromaDBClient:
         if distance_metric not in self.VALID_DISTANCE_METRIC:
             raise ValueError(
                 f"distance_metric should be one of {self.VALID_DISTANCE_METRIC}"
-                )
+            )
 
-    def reset_client(
-            self
-            ):
+    def reset_client(self):
         return self.client.reset()
 
 
 def refine_docs(
-        docs: List[Document],
-        escape_parts: List[str] = None,
-        ) -> List[Document]:
+    docs: List[Document],
+    escape_parts: List[str] = None,
+) -> List[Document]:
     """Remove any empty string from document or add escape parts
     to remove them from the docs.
     this function aim to not produce error when add empty string
@@ -100,16 +98,14 @@ def refine_docs(
             doc
             for doc in docs
             if not any(part in doc.page_content for part in escape_parts)
-            ]
+        ]
         new_docs = [doc for doc in new_docs if doc.page_content != ""]
     else:
         new_docs = [doc for doc in docs if doc.page_content != ""]
     return new_docs
 
 
-def sanitize_file_name(
-        path
-        ):
+def sanitize_file_name(path):
     # Get the directory and file name and extension
     directory, file_name, ext = path.parent, path.stem, path.suffix
     # Replace spaces and non-alphanumeric characters in the file name

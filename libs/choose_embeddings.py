@@ -17,7 +17,7 @@ SUPPORTED_EMBEDDINGS: List[str] = [
     "TogetherAI",
     "HuggingFaceBgeEmbeddings",
     "OllamaEmbeddings",
-    ]
+]
 
 
 @st.cache_resource
@@ -28,7 +28,7 @@ def hug_embedding():
         model_name="BAAI/bge-base-en",
         model_kwargs={"device": "cpu", "trust_remote_code": True},
         encode_kwargs={"normalize_embeddings": True},
-        )
+    )
 
 
 @st.cache_resource
@@ -37,17 +37,17 @@ def ollama_embedding():
 
     return OllamaEmbeddings(
         model="nomic-embed-text",
-        )
+    )
 
 
 def choose_embed_function(
-        embd_func_name: str,
-        ) -> Embeddings:
+    embd_func_name: str,
+) -> Embeddings:
     if embd_func_name not in SUPPORTED_EMBEDDINGS:
         logger.error(
             f"Embeddings {embd_func_name} not supported. "
             f"Supported options are: {SUPPORTED_EMBEDDINGS}"
-            )
+        )
         raise ValueError(f"Embeddings {embd_func_name} not supported")
 
     logger.info(f"Using {embd_func_name} embeddings")
@@ -61,7 +61,7 @@ def choose_embed_function(
 
         return OpenAIEmbeddings(
             model="text-embedding-3-small",
-            )
+        )
 
     if embd_func_name == "Cloudflare":
         if os.environ.get("CLOUDFLARE_API_KEY") is None:
@@ -70,13 +70,13 @@ def choose_embed_function(
             raise ValueError("CLOUDFLARE_API_KEY not set")
         from langchain_community.embeddings.cloudflare_workersai import (
             CloudflareWorkersAIEmbeddings,
-            )
+        )
 
         return CloudflareWorkersAIEmbeddings(
             account_id=os.getenv("CLOUDFLARE_ACCOUNT_ID"),
             api_token=os.getenv("CLOUDFLARE_API_KEY"),
             model_name="@cf/baai/bge-large-en-v1.5",
-            )
+        )
 
     if embd_func_name == "VoyageAI":
         if os.environ.get("VOYAGE_API_KEY") is None:
@@ -87,7 +87,7 @@ def choose_embed_function(
 
         return VoyageAIEmbeddings(
             model="voyage-large-2",
-            )
+        )
 
     if embd_func_name == "TogetherAI":
         if os.environ.get("TOGETHER_API_KEY") is None:
@@ -98,7 +98,7 @@ def choose_embed_function(
 
         return TogetherEmbeddings(
             model="togethercomputer/m2-bert-80M-32k-retrieval",
-            )
+        )
 
     if embd_func_name == "Google":
         if os.environ.get("GOOGLE_API_KEY") is None:
@@ -109,7 +109,7 @@ def choose_embed_function(
 
         return GoogleGenerativeAIEmbeddings(
             model="models/embedding-001",
-            )
+        )
 
     if embd_func_name == "HuggingFaceBgeEmbeddings":
         hug_embedding()

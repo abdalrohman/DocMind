@@ -1,7 +1,3 @@
-from libs.components.configure_api_keys import set_api_keys
-from libs.components.disable_components import disable_deploy
-from libs.components.header import set_page_header
-
 __import__("pysqlite3")
 import sys
 
@@ -15,6 +11,9 @@ from pathlib import Path
 import streamlit as st
 from st_pages import Page, show_pages
 
+from libs.components.configure_api_keys import set_api_keys
+from libs.components.disable_components import disable_deploy
+from libs.components.header import set_page_header
 from libs.config import config
 from libs.utilities.env import EnvironmentLoader
 from libs.utilities.log import Log
@@ -23,7 +22,7 @@ from libs.utilities.log import Log
 log = Log(
     log_file_path=Path(config.log_path) / "docmind.log",
     level=config.log_level,
-    )
+)
 log.get_logger()
 
 logger = logging.getLogger(__name__)
@@ -34,10 +33,10 @@ st.set_page_config(
     page_icon="📚🧠",
     layout="wide",
     menu_items={
-        "Get Help"    : "https://github.com/abdalrohman/DocMind/discussions",
+        "Get Help": "https://github.com/abdalrohman/DocMind/discussions",
         "Report a bug": "https://github.com/abdalrohman/DocMind/issues",
-        },
-    )
+    },
+)
 
 disable_deploy()
 
@@ -55,7 +54,7 @@ def load_env():
         "Search_Engine",
         "Embiddings",
         "Telemetry",
-        ]
+    ]
     if env_file_path.exists():
         EnvironmentLoader(env_file_path).load_envs()
     elif st_secretes.exists():
@@ -83,8 +82,8 @@ show_pages(
             "libs/components/pages/chat_with_search.py",
             "Chat With Enabled Search",
             "🔍",
-            ),
+        ),
         Page("libs/components/pages/rag_chat.py", "Rag chat", "📚"),
         # Page("", "Rag", "❓"),
-        ]
-    )
+    ]
+)

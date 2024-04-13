@@ -12,4 +12,4 @@ def disable_deploy():
     </style>
     """,
         unsafe_allow_html=True,
-        )
+    )
