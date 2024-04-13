@@ -11,9 +11,10 @@ from libs.components.header import set_page_header
 from libs.components.llm_settings import set_llm_settings_sidebar
 from libs.components.setup_embeddings import set_embeddings
 from libs.components.upload_files import (
-    DocumentProcessor
+    DocumentProcessor, ProcessRetriever
     )
 from libs.create_llm_chain import create_chain
+from libs.vectorstore import ChromaDBClient
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +48,21 @@ temp_dir = data_dir / "temp"
 chroma_dir = data_dir / "chroma"
 
 with st.sidebar:
-    doc_processor = DocumentProcessor(chroma_dir=chroma_dir, embeddings=embeddings)
-    uploaded_docs = doc_processor.upload_documents()
-
-    if uploaded_docs:
-        retriever = doc_processor.process_files(temp_dir=temp_dir, )
+    DocumentProcessor(
+        embeddings=embeddings, chroma_dir=chroma_dir, temp_dir=temp_dir
+        ).process_documents()
+    if st.session_state.retriever:
+        retriever = st.session_state.retriever
     else:
-        retriever = doc_processor.get_existing_db()
+        # try to get existing db if not show warning
+        retriever = ProcessRetriever(
+            embeddings=embeddings, chroma_dir=chroma_dir
+            ).get_retriever()
+        st.session_state.show_warning = False
 
 if llm and retriever:
+    st.sidebar.info("Ready to chat with your document.")
+
     answer_chain = create_chain(llm, retriever)
 
     # Handle user input
@@ -80,3 +87,12 @@ if llm and retriever:
 
 # Display additional options
 additional_options(history)
+
+if st.sidebar.button(
+        "Clear existing database", key="clear_db_btn",
+        type="primary", use_container_width=True
+        ):
+    if ChromaDBClient(path_to_chroma_db=str(chroma_dir), embeddings_function=embeddings).reset_client():
+        logger.info("Success clear database!")
+        st.toast("Success clear database!", icon="✅")
+        st.rerun()

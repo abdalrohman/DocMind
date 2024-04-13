@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 
 def rmdir_recursive(
@@ -19,3 +20,15 @@ def rmdir_recursive(
         dir_path.unlink(missing_ok=True)
 
     return True if not dir_path.exists() else False
+
+
+def path_to_str(
+        path: Union[Path, str]
+        ) -> str:
+    return str(path) if isinstance(path, Path) else path
+
+
+def str_to_path(
+        path: Union[Path, str]
+        ) -> Path:
+    return Path(path) if isinstance(path, str) else path

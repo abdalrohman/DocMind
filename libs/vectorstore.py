@@ -3,8 +3,7 @@ import re
 from pathlib import Path
 from typing import List
 
-import chromadb
-from chromadb import Settings
+from chromadb.config import Settings
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -21,7 +20,6 @@ class ChromaDBClient:
             embeddings_function: Embeddings = None,
             collection_name: str = "abdulrahman",
             chroma_store_type: str = "persist",
-            allow_reset: bool = True,
             reset: bool = False,
             delete_collection: bool = False,
             distance_metric: str = "l2",
@@ -32,25 +30,39 @@ class ChromaDBClient:
 
         self.collection_name = collection_name
         self.chroma_store_type = chroma_store_type
-        self.allow_reset = allow_reset
         self.distance_metric = distance_metric
         self.reset = reset
         self.delete_collection = delete_collection
         self.embeddings_function = embeddings_function
         self.path_to_chroma_db = path_to_chroma_db
 
-        self.client = self.create_client(self.path_to_chroma_db)
+        settings = Settings(
+            allow_reset=True,
+            is_persistent=True if self.chroma_store_type == "persist" else False,
+            persist_directory=self.path_to_chroma_db if self.path_to_chroma_db else "./chroma"
+            )
+
+        chroma_instance = Chroma(
+            persist_directory=self.path_to_chroma_db if self.chroma_store_type == "persist" else None,
+            collection_name=self.collection_name,
+            embedding_function=self.embeddings_function,
+            collection_metadata={"hnsw:space": self.distance_metric},
+            client_settings=settings,
+            )
+
+        # noinspection PyProtectedMember
+        self.client = chroma_instance._client
 
         if self.reset:
             logger.info("Resetting client...")
             self.client.reset()
 
         if self.delete_collection:
-            logger.info(f"Deleting collection {collection_name}...")
-            self.client.delete_collection(name=collection_name)
+            logger.info(f"Deleting collection {self.collection_name}...")
+            self.client.delete_collection(name=self.collection_name)
 
-        self.collection = self.get_or_create_collection()
-        self.db = self.create_chroma_db(self.path_to_chroma_db)
+        self.collection = self.client.get_or_create_collection(self.collection_name)
+        self.db = chroma_instance
         self.collection_count = self.collection.count()
         logger.info("ChromaDBClient initialized.")
 
@@ -68,36 +80,10 @@ class ChromaDBClient:
                 f"distance_metric should be one of {self.VALID_DISTANCE_METRIC}"
                 )
 
-    def create_client(
-            self,
-            chroma_path
-            ):
-        logger.info(f"Creating {self.chroma_store_type} client in {chroma_path}...")
-        client_class = chromadb.PersistentClient if self.chroma_store_type == "persist" else chromadb.Client
-        return client_class(
-            path=chroma_path,
-            settings=Settings(allow_reset=self.allow_reset),
-            )
-
-    def get_or_create_collection(
+    def reset_client(
             self
             ):
-        logger.info(f"Getting or creating collection {self.collection_name}...")
-        return self.client.get_or_create_collection(
-            name=self.collection_name, metadata={"hnsw:space": self.distance_metric}
-            )
-
-    def create_chroma_db(
-            self,
-            chroma_path
-            ):
-        logger.info(f"Creating Langchain instance of Chroma db in {chroma_path}...")
-        return Chroma(
-            client=self.client,
-            persist_directory=chroma_path,
-            collection_name=self.collection_name,
-            embedding_function=self.embeddings_function,
-            )
+        return self.client.reset()
 
 
 def refine_docs(
