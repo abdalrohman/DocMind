@@ -17,7 +17,7 @@ class HistoryExporter:
         self.history = history
         self.messages_dict = messages_to_dict(history.messages)
         self.export_history_dir = Path("./data/export_history")
-        self.export_history_dir.mkdir(exist_ok=True)
+        self.export_history_dir.mkdir(parents=True, exist_ok=True)
 
     def _export(
             self,
