@@ -69,6 +69,8 @@ class DocumentProcessor:
 
         if isinstance(user_data_dir, str):
             self.user_data_dir = Path(user_data_dir)
+        else:
+            self.user_data_dir = user_data_dir
 
         if not Path(self.user_data_dir).is_dir():
             raise ValueError(
