@@ -86,13 +86,6 @@ if os.environ.get("COHERE_API_KEY") is None:
     EnvironmentLoader(env_file_path=env_file_path).load_envs()
     st.stop()
 
-streamlit_secrets_path = Path(".") / ".streamlit" / "secrets.toml"
-if streamlit_secrets_path.is_file():
-    logger.info("Loading secrets from .streamlit/secrets.toml")
-    for section in ["LangSmith_Tracing", "LLMS", "Search_Engine", "Embiddings", "Telemetry", ]:
-        for key, value in st.secrets[section].items():
-            os.environ[key] = value
-
 # Navigate between pages
 show_pages(
     [
