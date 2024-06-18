@@ -1,61 +1,53 @@
-# test_rich_logger.py
-
+import io
 import logging
-from io import StringIO
+import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from libs.utilities.log import Log
+from docmind.utils.log import LogConfig
 
 
-def test_validate_log_file_path_str():
-    log = Log(log_file_path="test.log")
-    assert log.log_file_path == Path("test.log")
+class TestLogConfig(unittest.TestCase):
+    def test_initialization(self):
+        """Test the initialization of LogConfig."""
+        log_config = LogConfig()
+        self.assertIsInstance(log_config.log_file_path, str)
+        self.assertEqual(log_config.level, "INFO")
+
+    def test_invalid_level(self):
+        """Test LogConfig initialization with an invalid log level."""
+        with self.assertRaises(ValueError):
+            LogConfig(level="INVALID")
+
+    def test_log_file_path_validation(self):
+        """Test the log file path validation."""
+        log_config = LogConfig(log_file_path="test.log")
+        self.assertEqual(log_config.log_file_path, Path("test.log"))
+
+    def test_log_file_path_validation_with_io(self):
+        """Test the log file path validation with an io.StringIO object."""
+        with io.StringIO("test.log") as file_obj:
+            log_config = LogConfig(log_file_path=file_obj)
+            self.assertEqual(log_config.log_file_path, Path("test.log"))
+
+    def test_get_logger(self):
+        """Test the get_logger method."""
+        with patch("logging.FileHandler"):
+            log = LogConfig()
+            logger = log.get_logger()
+            assert isinstance(logger, logging.Logger)
+
+    def test_clean_log_file(self):
+        """Test the clean_log_file functionality."""
+        temp_log_file = Path("temp.log")
+        temp_log_file.touch()
+        with patch.object(Path, "exists", return_value=True), patch.object(
+                Path, "unlink"
+        ) as mock_unlink, patch("logging.FileHandler"):
+            log = LogConfig(log_file_path=temp_log_file, clean_log_file=True)
+            log.get_logger()
+            mock_unlink.assert_called_once()
 
 
-def test_validate_log_file_path_stringio():
-    stringio = StringIO()
-    log = Log(log_file_path=stringio)
-    assert log.log_file_path == Path(stringio.getvalue())
-
-
-def test_get_logger_cleans_file():
-    with patch.object(Path, "exists", return_value=True), patch.object(
-        Path, "unlink"
-    ) as mock_unlink, patch("logging.FileHandler"):
-        log = Log(log_file_path="test.log", clean_log_file=True)
-        log.get_logger()
-        mock_unlink.assert_called_once()
-
-
-def test_get_logger_returns_logger():
-    with patch("logging.FileHandler"):
-        log = Log()
-        logger = log.get_logger()
-        assert isinstance(logger, logging.Logger)
-
-
-def test_log_level():
-    log = Log(level="INFO")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("INFO")
-
-    log = Log(level="DEBUG")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("DEBUG")
-
-    log = Log(level="WARNING")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("WARNING")
-
-    log = Log(level="ERROR")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("ERROR")
-
-    log = Log(level="CRITICAL")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("CRITICAL")
-
-    log = Log(level="NOTSET")
-    logger = log.get_logger()
-    assert logger.level == logging.getLevelName("NOTSET")
+if __name__ == '__main__':
+    unittest.main()

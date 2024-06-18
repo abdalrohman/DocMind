@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from libs.utilities.env import EnvironmentLoader
+from docmind.utils.env import EnvironmentLoader
 
 
 # Test to verify that the .env file exists

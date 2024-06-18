@@ -274,3 +274,7 @@ backup
 config.yaml
 data
 .streamlit/.secrets.toml
+user_data
+cookbook
+authenticator_config.yaml
+poetry.lock
