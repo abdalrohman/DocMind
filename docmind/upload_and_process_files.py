@@ -38,7 +38,7 @@ class GetRetriever:
             self.chroma_instance.add_documents(self.documents)
 
         search_kwargs = {
-            "k": 30,
+            "k": 50,
             "lambda_mult": 0,
             "fetch_k": 50,
         }
