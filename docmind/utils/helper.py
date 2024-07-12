@@ -38,9 +38,7 @@ def sanitize_file_name(path):
 
 
 def rmdir_recursive(dir_path: Path) -> bool:
-    """
-    Recursively deletes a directory and its contents.
-    """
+    """Recursively deletes a directory and its contents."""
 
     if not dir_path.exists():
         return True
@@ -56,9 +54,7 @@ def rmdir_recursive(dir_path: Path) -> bool:
 
 
 def truncate_files_in_folder(folder_path: Path) -> None:
-    """
-    Iterates over the files in a given folder and truncates them to zero size.
-    """
+    """Iterates over the files in a given folder and truncates them to zero size."""
 
     if not folder_path.is_dir():
         raise ValueError(f"The provided path: {folder_path} is not a directory.")
@@ -71,9 +67,7 @@ def truncate_files_in_folder(folder_path: Path) -> None:
 
 
 def move_files(src_dir: Path, dest_dir: Path) -> None:
-    """
-    Moves files from the source directory to the destination directory.
-    """
+    """Moves files from the source directory to the destination directory."""
 
     if not src_dir.is_dir():
         raise ValueError(f"The source path: {src_dir} is not a directory.")
@@ -88,16 +82,12 @@ def move_files(src_dir: Path, dest_dir: Path) -> None:
 
 
 def path_to_str(path: Path) -> str:
-    """
-    Converts a Path object to a string.
-    """
+    """Converts a Path object to a string."""
 
     return str(path) if isinstance(path, Path) else path
 
 
 def str_to_path(path: str) -> Path:
-    """
-    Converts a string to a Path object.
-    """
+    """Converts a string to a Path object."""
 
     return Path(path) if isinstance(path, str) else path

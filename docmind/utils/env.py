@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class EnvironmentLoader:
-    """
-    A class to load and verify environment variables from a .env file.
-    """
+    """A class to load and verify environment variables from a .env file."""
 
     def __init__(self, env_file_path: Union[str, Path] = ".env", required_vars: List[str] = None):
         """
@@ -33,9 +31,7 @@ class EnvironmentLoader:
         self._check_required_vars()
 
     def _check_required_vars(self) -> None:
-        """
-        Checks if all required environment variables are set.
-        """
+        """Checks if all required environment variables are set."""
         missing_vars = [var for var in self.required_vars if not os.getenv(var)]
         if missing_vars:
             raise ValueError(f"Required environment variables not found: {missing_vars}")
